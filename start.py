@@ -22,26 +22,12 @@ def training(neural, images, labels, pack_len=1):
     """обучение нейросети"""
     ln = [*range(len(images))]
     np.random.shuffle(ln)
-    index = -1
-    i = 0
-    while len(ln) != index + 1:
-        images_list = []
-        targets_list = []
 
-        for _ in range(pack_len):
-            index += 1
+    for elem in ln:
+        image = image_to_data(images[elem])
+        label = label_to_data(labels[elem], 10)
+        neural.train(image, label)
 
-            images_list.append((np.reshape(images[ln[index]], -1) / 255 * 0.99) + 0.01)
-            targets_list.append(label_to_data(labels[ln[index]], 10))
-
-        neural.train(images_list, targets_list)
-
-        if index > 5 + i:
-            i += 5000
-            print(str(int((index / len(ln)) * 100)) + "%", end="   ")
-
-    del ln
-    print("Завершен процесс")
 
 def view(neural, images, labels):
     """презентация"""
@@ -52,8 +38,8 @@ def view(neural, images, labels):
         image = images[elem]
         label = labels[elem]
 
-        result = np.transpose(neural.query([(np.reshape(images[elem], -1) / 255 * 0.99) + 0.01]))
-        print(result)
+        result = np.transpose(neural.query(image_to_data(images[elem])))
+
         print(f"Результат: {np.argmax(result)}\n"
               f"Должно: {label}")
 
@@ -61,7 +47,8 @@ def view(neural, images, labels):
         ax.pcolormesh(image, cmap=plt.colormaps["Greys"])
         plt.show()
 
-
+def image_to_data(image: list[list[int]]) -> list[int]:
+    return (np.reshape(image, -1) / 255 * 0.99) + 0.01
 def label_to_data(label: int, ln: int) -> list[int]:
     data = np.zeros(ln) + 0.01
     data[label] = 0.99

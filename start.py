@@ -1,9 +1,26 @@
 from data_read import *
+from save import *
 from neural import neuralNetwork
 import matplotlib.pyplot as plt
 
 
 def main():
+    while True:
+        save = input("Использовать сохранение? [Y\\n]: ")
+        if save in ("Y", "y"):
+            neural = use_saved_file()
+            images = images_read("train/train-images.gz")
+            labels = labels_read("train/train-labels.gz")
+            correct(neural, images, labels)
+            view(neural, images, labels)
+            break
+        if save in ("N", "n"):
+            init()
+            break
+        print("Неправильное введен аргумент")
+
+
+def init():
     input_node = 784
     hidden_nodes = [500, 500]
     output_nodes = 10
@@ -14,12 +31,24 @@ def main():
     images = images_read("train/train-images.gz")
     labels = labels_read("train/train-labels.gz")
 
+    print("Обучение нейронной сети...")
     training(neural, images, labels)
+
+    while True:
+        save = input("Завершено обучение нейронной сети, Сохранить результат? [Y\\n]: ")
+        if save in ("Y", "y"):
+            save_file(neural)
+            break
+        if save in ("N", "n"):
+            break
+        print("Неправильное введен аргумент")
+
+    correct(neural, images, labels)
     view(neural, images, labels)
 
 
-def training(neural, images, labels, pack_len=1):
-    """обучение нейросети"""
+def training(neural, images, labels):
+    """Обучение нейросети"""
     ln = [*range(len(images))]
     np.random.shuffle(ln)
 
@@ -47,12 +76,33 @@ def view(neural, images, labels):
         ax.pcolormesh(image, cmap=plt.colormaps["Greys"])
         plt.show()
 
+
+def correct(neural, images, labels, quantity=500):
+    """Процент правильных ответов"""
+    ln = [*range(len(labels))]
+    np.random.shuffle(ln)
+
+    true = 0
+
+    for i in range(quantity):
+        elem = ln[i]
+        label = labels[elem]
+        result = np.transpose(neural.query(image_to_data(images[elem])))
+        if np.argmax(result) == label:
+            true += 1
+
+    print(f"Общий процент правильных ответов: {true / quantity}")
+
+
 def image_to_data(image: list[list[int]]) -> list[int]:
     return (np.reshape(image, -1) / 255 * 0.99) + 0.01
+
+
 def label_to_data(label: int, ln: int) -> list[int]:
     data = np.zeros(ln) + 0.01
     data[label] = 0.99
     return data
+
 
 if __name__ == '__main__':
     main()

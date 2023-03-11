@@ -37,22 +37,17 @@ class neuralNetwork:
                                                                                         self.hnodes[i])))
         return list_w
 
-
     def train(self, inputs_list, targets_list):
         """метод для тренировки нейронной сети"""
         inputs = np.array(inputs_list, ndmin=2).T
         targets = np.array(targets_list, ndmin=2).T
         outputs_list = []
         outputs = 0
-        i = 0
         # получение выходных сигналов на каждом слое
-        for hn in self.w:
-            if i == 0:
-                outputs = self.activation_function(np.dot(hn, inputs))
-            else:
-                outputs = self.activation_function(np.dot(hn, outputs))
+        for i, hn in enumerate(self.w):
+            outputs = self.activation_function(np.dot(hn, inputs)) if i == 0 else self.activation_function(np.dot(hn, outputs))
+
             outputs_list.append(outputs)
-            i += 1
         # получение ошибки в зависимости от целевого значения на выходе
         output_errors = targets - outputs
         # обратное распространение ошибки в зависимости от колличества скрытых слоев
@@ -60,9 +55,8 @@ class neuralNetwork:
             self.w[0] += self.lr * np.dot((output_errors * outputs_list[0] * (1.0 - outputs_list[0])),
                                      np.transpose(inputs))
         else:
-            i = 0
             outputs_list = outputs_list[::-1]
-            for out in outputs_list:
+            for i, out in enumerate(outputs_list):
                 if i == 0:
                     self.w[-(i + 1)] += self.lr * np.dot((output_errors * out * (1.0 - out)),
                                                   np.transpose(outputs_list[i + 1]))
@@ -81,7 +75,6 @@ class neuralNetwork:
                     errors = np.dot(self.w[-i].T, errors)
                     self.w[-(i + 1)] += self.lr * np.dot((errors * out * (1.0 - out)),
                                                          np.transpose(outputs_list[i + 1]))
-                i += 1
 
 
     def query(self, inputs_list):

@@ -58,7 +58,7 @@ def training(neural, images, labels):
         neural.train(image, label)
 
 
-def view(neural, images, labels):
+def view(neural, images, labels, print_result=True):
     """презентация"""
     ln = [*range(len(labels))]
     np.random.shuffle(ln)
@@ -69,15 +69,16 @@ def view(neural, images, labels):
 
         result = np.transpose(neural.query(image_to_data(images[elem])))
 
-        print(f"Результат: {np.argmax(result)}\n"
-              f"Должно: {label}")
+        if print_result:
+            print(f"Результат: {np.argmax(result)}\n"
+                  f"Должно: {label}")
 
         fig, ax = plt.subplots()
         ax.pcolormesh(image, cmap=plt.colormaps["Greys"])
         plt.show()
 
 
-def correct(neural, images, labels, quantity=500):
+def correct(neural, images, labels, quantity=500, print_result=True):
     """Процент правильных ответов"""
     ln = [*range(len(labels))]
     np.random.shuffle(ln)
@@ -91,7 +92,12 @@ def correct(neural, images, labels, quantity=500):
         if np.argmax(result) == label:
             true += 1
 
-    print(f"Общий процент правильных ответов: {true / quantity}")
+    result = true / quantity
+
+    if print_result:
+        print(f"Общий процент правильных ответов: {result}")
+
+    return result
 
 
 def image_to_data(image: list[list[int]]) -> list[int]:

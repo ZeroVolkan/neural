@@ -1,8 +1,8 @@
 from neural import *
 
 
-def save_file(neural: neuralNetwork):
-    name = input("Имя файла: ")
+def save_file(neural: neuralNetwork, file=None):
+    name = file or input("Имя файла: ")
     with open(name, "w") as f:
         for elem in (neural.inodes, neural.onodes, neural.lr):
             f.write(f"{elem}\\")
@@ -12,8 +12,8 @@ def save_file(neural: neuralNetwork):
     np.savez(name, *neural.w)
 
 
-def use_saved_file() -> neuralNetwork:
-    name = input("Имя файла: ")
+def use_saved_file(file=None) -> neuralNetwork:
+    name = file or input("Имя файла: ")
     with open(name, "r") as f:
         objs = f.read().split("\\")
 
